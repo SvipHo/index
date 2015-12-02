@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <script type="text/javascript" src="../jquery.js"></script>
+    <link rel="stylesheet" type="text/css" href="../main.css">
+    <script>
+    function addClick(){
+        $(".pic a").click(function(e){
+            e.preventDefault();
+            var num = $(this).attr('href').match(/\d+/)[0];
+           //alert(num);
+            history.pushState({"num": num}, document.title, "./pic-" + num);
+            load(num);
+        });
+    }
+    function load(num){
+        $.ajax({
+                    "url":'./index1.php',
+                    "data": {
+                        "num": num
+                    },
+                    "dataType": "html",
+                    "headers": {
+                        "X_PJAX": true
+                    }
+        }).done(function(html){
+                    $(".pic").html(html).find("h3").hide().fadeIn(300);
+                    addClick();
+                });
+
+    }
+    $(function(){
+
+        addClick();
+
+        for(var i = 1; i <= 3; i++){
+            history.pushState({"num": i}, document.title, "./pic-" + i);
+        }
+
+        $(window).on("popstate", function(){
+            var num = history.state.num;
+            document.title = num + " | pic";
+            //PJAX加载
+            load(num);
+        });
+    });
+
+    </script>
+    <title>pjax</title>
+</head>
+<body>
+
+<!--<div class="contain" id="gallery">-->
+    <div class="info">
+        <div class="pic">
+            <div class="imgwrap">
+                <h3>1</h3>
+            </div>
+            <a href="num=2" class="next">下一张&gt;&gt;</a>
+        </div>
+        <div class="detail"></div>
+    </div>
+<!--</div>-->
+
+</body>
+</html>

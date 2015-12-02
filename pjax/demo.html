@@ -1,0 +1,90 @@
+<!DOCTYPE html PUBLIC "-//WAPFORUM//DTD XHTML Mobile 1.0//EN" "http://www.wapforum.org/DTD/xhtml-mobile10.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=utf-8" />
+    <meta name="author" content="Barret Lee" />
+    <meta name="eamil" content="barret.china@gmail.com" />
+    <title>PJAX Demo - By BarretLee</title>
+    <link rel="stylesheet" type="text/css" href="./main.css">
+</head>
+<body>
+<div class="header">
+    <div class="hwrap">
+        <h1>PJAX <span>DEMO</span></h1>
+        <ul class="nav">
+            <li><a href="./index.html">index</a></li>
+            <li><a href="#" id="nav_on">gallery</a></li>
+        </ul>
+    </div>
+</div>
+<div class="contain" id="gallery">
+    <div class="info">
+        <div class="pic">
+            <div class="imgwrap">
+                <img src="./images/1.jpg" />
+            </div>
+            <span><a href="num=2" class="next">下一张&gt;&gt;</a></span>
+        </div>
+        <div class="detail"></div>
+    </div>
+</div>
+<script type="text/javascript" src="./jquery.js"></script>
+<script type="text/javascript">
+
+    if(!history.pushState) alert("你的浏览器不支持HTML5中history的新特性，\n建议您使用现代浏览器查看~\n否则木有效果O(∩_∩)O~");
+
+    //添加点击事件
+    function addClick(){
+        $(".pic a").on("click", function(evt){
+            evt.preventDefault();
+
+            var $this = $(this),
+                    num = $this.attr("href").match(/\d+/)[0];
+
+            history.pushState({"num": num}, document.title, "./pic-" + num);
+
+            //PJAX加载
+            load(num);
+        });
+    }
+
+    //加载函数
+    function load(num){
+        document.title = num + " | pic";
+
+        $(".pic img").fadeOut(500, function(){
+            $.ajax({
+                "url": "./index.php",
+                "data": {
+                    "num": num
+                },
+                "dataType": "html",
+                "headers": {
+                    "X_PJAX": true
+                }
+            }).done(function(html){
+                $(".pic").html(html).find("img").hide().fadeIn(300);
+                addClick();
+            });
+        });
+    }
+
+    //初始绑定
+    $(document).ready(function() {
+        addClick();
+
+        for(var i = 1; i <= 3; i++){
+            history.pushState({"num": i}, document.title, "./pic-" + i);
+        }
+
+        $(window).on("popstate", function(){
+            var num = history.state.num;
+            document.title = num + " | pic";
+            //PJAX加载
+            load(num);
+        });
+    });
+
+</script>
+</body>
+</html>
